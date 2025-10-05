@@ -14,7 +14,7 @@ app.use(express.json());
 // MongoDB Connection with better error handling
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://nss:nss@cluster0.tp1c0.mongodb.net/p1?retryWrites=true&w=majority&appName=Cluster0', {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://nss:nss@cluster.mongodb.net/p1?retryWrites=true&w=majority', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             connectTimeoutMS: 30000,
