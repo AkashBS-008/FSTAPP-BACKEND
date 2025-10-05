@@ -19,6 +19,11 @@ mongoose.connect('mongodb+srv://nss:nss@cluster0.tp1c0.mongodb.net/p1?retryWrite
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log('MongoDB Connection Error:', err));
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to FST App API' });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
