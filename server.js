@@ -11,13 +11,37 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect('mongodb+srv://nss:nss@cluster0.tp1c0.mongodb.net/p1?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.log('MongoDB Connection Error:', err));
+// MongoDB Connection with better error handling
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://nss:nss@cluster0.tp1c0.mongodb.net/p1?retryWrites=true&w=majority&appName=Cluster0', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            connectTimeoutMS: 30000,
+            socketTimeoutMS: 30000,
+            serverSelectionTimeoutMS: 30000
+        });
+        console.log('MongoDB Connected Successfully');
+    } catch (error) {
+        console.error('MongoDB Connection Error:', error);
+        // Attempt to reconnect
+        setTimeout(connectDB, 5000);
+    }
+};
+
+// Initial connection
+connectDB();
+
+// Handle connection errors after initial connection
+mongoose.connection.on('error', (error) => {
+    console.error('MongoDB connection error:', error);
+    setTimeout(connectDB, 5000);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB disconnected. Attempting to reconnect...');
+    setTimeout(connectDB, 5000);
+});
 
 // Root route
 app.get('/', (req, res) => {
