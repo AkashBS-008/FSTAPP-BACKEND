@@ -7,14 +7,25 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS Configuration
+app.use(cors({
+    origin: [
+        'https://tcenss.vercel.app',
+        'http://localhost:3000'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// Body Parser Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection with better error handling
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://nss:nss@cluster0.tp1c0.mongodb.net/p1?retryWrites=true&w=majority&appName=Cluster0', {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://admin:admin@cluster0.wyixm.mongodb.net/p1?retryWrites=true&w=majority&appName=Cluster0', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             connectTimeoutMS: 30000,
@@ -56,6 +67,25 @@ app.use('/api/blood-requirements', require('./routes/bloodRequirements'));
 app.use('/api/attendance', require('./routes/attendance'));
 
 const PORT = process.env.PORT || 5000;
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        status: 'error',
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
+
+// Handle 404 routes
+app.use((req, res) => {
+    res.status(404).json({
+        status: 'error',
+        message: 'Route not found'
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
